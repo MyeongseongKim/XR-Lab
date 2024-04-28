@@ -3284,6 +3284,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1964023568}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &306148366
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 306148368}
+  - component: {fileID: 306148367}
+  m_Layer: 0
+  m_Name: Hand Skeleton Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &306148367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 306148366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce10cb47dff6ef54d83bf5428284a2d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _leftHand: {fileID: 1260685809}
+  _rightHand: {fileID: 522633587}
+  _jointPrefab: {fileID: 8132899805561770407, guid: 9275be9a4571c5241a82850e9d13e60f, type: 3}
+  _linkPrefab: {fileID: 2288284359493613816, guid: c521ee9a7f9427b4e8793582192977bd, type: 3}
+  _tipPrefab: {fileID: 8132899805561770407, guid: 2281a5e9dd0b52a4ebc91e3e2fcb48cc, type: 3}
+--- !u!4 &306148368
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 306148366}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &311977904
 GameObject:
   m_ObjectHideFlags: 0
@@ -17838,3 +17887,4 @@ SceneRoots:
   - {fileID: 814584497}
   - {fileID: 1900387931}
   - {fileID: 193830493}
+  - {fileID: 306148368}
