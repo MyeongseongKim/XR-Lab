@@ -32,6 +32,13 @@ public class TouchHand : MonoBehaviour
         {HandFinger.Pinky, new HandJointId[] {HandJointId.HandWristRoot, HandJointId.HandPinky1, HandJointId.HandPinky2, HandJointId.HandPinky3, HandJointId.HandPinkyTip}}
     };
     public Transform[] _fingerPads;
+    private bool[] _fingerTouchStatus;
+    public bool GetTouchStatus(HandFinger handFinger) {
+        return _fingerTouchStatus[(int) handFinger];
+    }
+    public void SetTouchStatus(HandFinger handFinger, bool status) {
+        _fingerTouchStatus[(int) handFinger] = status;
+    }
 
     private Dictionary<HandFinger, Pose[]> _currentHandJointPoses;
     public Dictionary<HandFinger, Pose[]> GetCurrentHandJointPoses() {
@@ -59,6 +66,10 @@ public class TouchHand : MonoBehaviour
 
         _currentHandJointPoses = new Dictionary<HandFinger, Pose[]>();
         _previousHandJointPoses = new Dictionary<HandFinger, Pose[]>();
+
+        _fingerTouchStatus = new bool[5] {
+            false, false, false, false, false
+        };
     }
 
 

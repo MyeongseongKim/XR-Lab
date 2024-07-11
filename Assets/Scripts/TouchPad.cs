@@ -27,6 +27,12 @@ public class TouchPad : MonoBehaviour
     private Dictionary<TouchFinger, Vector3> _currentTouchPoints;
     private Dictionary<TouchFinger, Vector3> _previousTouchPoints;
 
+    public enum Mode {
+        TwoInOne,
+        SeparatedTwo
+    };
+    public Mode _mode;
+
     public GameObject _touchPointPrefab;
 
 
@@ -78,17 +84,31 @@ public class TouchPad : MonoBehaviour
         UpdateTouchPoint(collider);
 
         TouchFinger touchFinger = collider.gameObject.GetComponent<TouchColliderInfo>().touchFinger;
-        TouchHand touchHand;
-        if (touchFinger.handedness == Handedness.Left) {
-            touchHand = _leftTouchHand;
+        TouchHand touchHand = GetTouchHand(touchFinger);
         HandFinger handFinger = touchFinger.handFinger;
-        }
-        else {
-            touchHand = _rightTouchHand;
-        }
 
-        Pose[] previousFingerJointPoses = touchHand.GetPreviousHandJointPoses()[handFinger];
-        Pose[] currentFingerJointPoses = touchHand.GetCurrentHandJointPoses()[handFinger];
+        switch (_mode)
+        {
+            case Mode.TwoInOne:
+                RotateAndTranslateInOneAction(touchHand, handFinger);
+                break;
+            case Mode.SeparatedTwo:
+                RotateAndTranslateSeparately(touchHand, handFinger);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void OnTriggerExit(Collider collider) 
+    {
+        DestroyTouchPoint(collider);
+    }
+
+
+    private void RotateAndTranslateInOneAction(TouchHand hand, HandFinger finger) {
+        Pose[] previousFingerJointPoses = hand.GetPreviousHandJointPoses()[finger];
+        Pose[] currentFingerJointPoses = hand.GetCurrentHandJointPoses()[finger];
 
         Vector3 previousRoot = previousFingerJointPoses[(int) TouchHand.FingerJointIndex.Root].position;
         Vector3 currentRoot = currentFingerJointPoses[(int) TouchHand.FingerJointIndex.Root].position;
@@ -101,6 +121,8 @@ public class TouchPad : MonoBehaviour
         Vector3 currentRootToStart = currentStart - currentRoot;
         Vector3 previousStartToPad = previousPad - previousStart;
         Vector3 currentStratToPad = currentPad - currentStart;
+
+        // Debug.Log("Rotate & Translate");
 
         // rotation
         Vector3 rotationFrom = Vector3.ProjectOnPlane(previousRootToStart, this.transform.up);
@@ -119,14 +141,46 @@ public class TouchPad : MonoBehaviour
         _netTranslation += translation * 0.2f;
     }
 
-    void OnTriggerExit(Collider collider) 
-    {
-        DestroyTouchPoint(collider);
+    private void RotateAndTranslateSeparately(TouchHand hand, HandFinger finger) {
+        if (finger == HandFinger.Thumb) 
+            return;
+
+        Pose[] previousFingerJointPoses = hand.GetPreviousHandJointPoses()[finger];
+        Pose[] currentFingerJointPoses = hand.GetCurrentHandJointPoses()[finger];
+
+        Vector3 previousRoot = previousFingerJointPoses[(int) TouchHand.FingerJointIndex.Root].position;
+        Vector3 currentRoot = currentFingerJointPoses[(int) TouchHand.FingerJointIndex.Root].position;
+        Vector3 previousPad = previousFingerJointPoses[(int) TouchHand.FingerJointIndex.Pad].position;
+        Vector3 currentPad = currentFingerJointPoses[(int) TouchHand.FingerJointIndex.Pad].position;
+
+        Vector3 previousRootToPad = previousPad - previousRoot;
+        Vector3 currentRootToPad = currentPad - currentRoot;
+
+        if (hand.GetTouchStatus(HandFinger.Thumb)) {
+            // rotation
+            // Debug.Log("Rotate");
+            Vector3 rotationFrom = Vector3.ProjectOnPlane(previousRootToPad, this.transform.up);
+            Vector3 rotationTo = Vector3.ProjectOnPlane(currentRootToPad, this.transform.up);
+            Quaternion rotation = Quaternion.Inverse(Quaternion.FromToRotation(rotationFrom, rotationTo));
+            _netRotation = Quaternion.SlerpUnclamped(Quaternion.identity, rotation, 0.2f) * _netRotation;
+        }
+        else {
+            // translation
+            // Debug.Log("Translate");
+            Vector3 from = Vector3.ProjectOnPlane(previousPad, this.transform.up);
+            Vector3 to = Vector3.ProjectOnPlane(currentPad, this.transform.up);
+            Vector3 delta = to - from;
+            Vector3 translation = Quaternion.Inverse(this.transform.rotation) * Vector3.ProjectOnPlane(-delta, this.transform.up);
+            _netTranslation += translation * 0.2f;
+        }
     }
 
 
     private void CreateTouchPoint(Collider collider) {
         TouchFinger touchFinger = collider.gameObject.GetComponent<TouchColliderInfo>().touchFinger;
+        TouchHand touchHand = GetTouchHand(touchFinger);
+        touchHand.SetTouchStatus(touchFinger.handFinger, true);
+        
         Vector3 contact = _touchColliderBox.ClosestPoint(collider.transform.position);
         _currentTouchPointObjs.Add(collider, Instantiate(_touchPointPrefab, this.transform));
         _currentTouchPointObjs[collider].transform.position = contact;
@@ -144,10 +198,22 @@ public class TouchPad : MonoBehaviour
     
     private void DestroyTouchPoint(Collider collider) {
         TouchFinger touchFinger = collider.gameObject.GetComponent<TouchColliderInfo>().touchFinger;
+        TouchHand touchHand = GetTouchHand(touchFinger);
+        touchHand.SetTouchStatus(touchFinger.handFinger, false);
+        
         Destroy(_currentTouchPointObjs[collider]);
         _currentTouchPointObjs.Remove(collider);
         _currentTouchPoints.Remove(touchFinger);
         _previousTouchPoints.Remove(touchFinger);
     }
 
+
+    private TouchHand GetTouchHand(TouchFinger touchFinger) {
+        if (touchFinger.handedness == Handedness.Left) {
+            return _leftTouchHand;
+        }
+        else {
+            return _rightTouchHand;
+        }
+    }
 }
