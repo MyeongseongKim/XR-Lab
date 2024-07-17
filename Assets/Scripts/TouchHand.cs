@@ -57,6 +57,9 @@ public class TouchHand : MonoBehaviour
         _fingerTouches = new Dictionary<HandFinger, GameObject>();
         foreach (var finger in FINGER_JOINTS) {
             GameObject touchObj = Instantiate(_fingerTipPrefab, this.gameObject.transform);
+            if (finger.Key == HandFinger.Thumb) {
+                touchObj.transform.localScale *= 2f;
+            }
             touchObj.GetComponent<TouchColliderInfo>().touchFinger = 
                 new TouchFinger(_hand.Handedness, finger.Key);
             touchObj.name = _hand.Handedness.ToString() + finger.Key.ToString() + "Touch";
