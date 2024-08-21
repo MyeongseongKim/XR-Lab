@@ -2588,6 +2588,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _mode: 0
   _touchPointPrefab: {fileID: 7847653373159977118, guid: 8a1462446b8b3a74ba80a176d1ab0ea1, type: 3}
 --- !u!1 &186292604
 GameObject:
@@ -5813,10 +5814,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mainCameraRig: {fileID: 193830493}
-  _rotationSensitivity: 1
-  _translationSensitivity: 10
+  _translationGain: {x: 10, y: 0, z: 10}
+  _rotationGain: 1
   _inertia: 1
-  _drag: 1
+  _drag: 0.5
   _angularDrag: 1
   _velocity: {x: 0, y: 0, z: 0}
   _angularVelocity: {x: 0, y: 0, z: 0, w: 0}

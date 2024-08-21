@@ -8,10 +8,8 @@ public class CameraMgr : MonoBehaviour
     // public Camera _mainCamera;
     public Transform _mainCameraRig;
 
-    [Range(0.1f, 100f)]
-    public float _rotationSensitivity;
-    [Range(0.1f, 100f)]
-    public float _translationSensitivity;
+    public Vector3 _translationGain;
+    public float _rotationGain;
 
     public bool _inertia;
     [Range(0f, 100f)]
@@ -62,23 +60,27 @@ public class CameraMgr : MonoBehaviour
 
     public void CameraPanTilt(float pitch, float yaw, float roll) {
         Quaternion qRot = Quaternion.Euler(pitch, yaw, roll);
+        Quaternion delta = Quaternion.SlerpUnclamped(Quaternion.identity, qRot, _rotationGain);
         if (_inertia) {
-            _angularVelocity = 
-                Quaternion.SlerpUnclamped(Quaternion.identity, qRot, _rotationSensitivity) * _angularVelocity;
+            _angularVelocity = delta * _angularVelocity;
         }
         else {
-            _mainCameraRig.rotation = 
-                Quaternion.SlerpUnclamped(Quaternion.identity, qRot, _rotationSensitivity) * _mainCameraRig.rotation;
+            _mainCameraRig.rotation = delta * _mainCameraRig.rotation;
         }
     }
 
     public void CameraDollyTrack(float truck, float jib, float dolly) {
-        Vector3 heading = _mainCameraRig.transform.rotation * new Vector3(truck, jib, dolly);
+        Vector3 heading = new Vector3(
+            _translationGain.x * truck, 
+            _translationGain.y * jib, 
+            _translationGain.z * dolly
+        );
+        Vector3 delta = _mainCameraRig.transform.rotation * heading;
         if (_inertia) {
-            _velocity += _translationSensitivity * heading;
+            _velocity += delta;
         }
         else {
-            _mainCameraRig.position += _translationSensitivity * heading;
+            _mainCameraRig.position += delta;
         }
     }
 
