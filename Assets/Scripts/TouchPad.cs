@@ -29,7 +29,8 @@ public class TouchPad : MonoBehaviour
 
     public enum Mode {
         TwoInOne,
-        SeparatedTwo
+        SeparatedTwo, 
+        Rowing
     };
     public Mode _mode;
 
@@ -94,6 +95,9 @@ public class TouchPad : MonoBehaviour
                 break;
             case Mode.SeparatedTwo:
                 RotateAndTranslateSeparately(touchHand, handFinger);
+                break;
+            case Mode.Rowing:
+                Row(touchHand, handFinger);
                 break;
             default:
                 break;
@@ -173,6 +177,36 @@ public class TouchPad : MonoBehaviour
             Vector3 translation = Quaternion.Inverse(this.transform.rotation) * Vector3.ProjectOnPlane(-delta, this.transform.up);
             _netTranslation += translation * 0.2f;
         }
+    }
+
+    private void Row(TouchHand hand, HandFinger finger) {
+        if (finger != HandFinger.Index) 
+            return;
+
+        Pose[] previousFingerJointPoses = hand.GetPreviousHandJointPoses()[finger];
+        Pose[] currentFingerJointPoses = hand.GetCurrentHandJointPoses()[finger];
+
+        Vector3 previousRoot = previousFingerJointPoses[(int) TouchHand.FingerJointIndex.Root].position;
+        Vector3 currentRoot = currentFingerJointPoses[(int) TouchHand.FingerJointIndex.Root].position;
+
+        Vector3 from = Vector3.ProjectOnPlane(previousRoot, this.transform.up);
+        Vector3 to = Vector3.ProjectOnPlane(currentRoot, this.transform.up);
+        Vector3 delta = to - from;
+        Vector3 deltaForward = Vector3.Dot(delta, this.transform.forward) * this.transform.forward;
+
+        // rotation
+        Quaternion rotation;
+        if (hand.handedness == Handedness.Left) {
+            rotation = Quaternion.FromToRotation(deltaForward, -this.transform.right);
+        }
+        else {
+            rotation = Quaternion.FromToRotation(deltaForward, this.transform.right);
+        }
+        _netRotation = Quaternion.SlerpUnclamped(Quaternion.identity, rotation, 5f * deltaForward.magnitude) * _netRotation;
+
+        // translation
+        Vector3 translation = Quaternion.Inverse(this.transform.rotation) * Vector3.ProjectOnPlane(-deltaForward, this.transform.up);
+        _netTranslation += translation;
     }
 
 

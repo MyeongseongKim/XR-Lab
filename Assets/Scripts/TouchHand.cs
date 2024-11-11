@@ -9,6 +9,10 @@ using Oculus.Interaction.PoseDetection;
 public class TouchHand : MonoBehaviour
 {
     public Hand _hand;
+    private Handedness _handedness;
+    public Handedness handedness {
+        get { return _handedness; }
+    }
     public FingerFeatureStateProvider _fingerFeatures;
 
     public GameObject _fingerTipPrefab;
@@ -54,6 +58,8 @@ public class TouchHand : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        _handedness = _hand.Handedness;
+
         _fingerTouches = new Dictionary<HandFinger, GameObject>();
         foreach (var finger in FINGER_JOINTS) {
             GameObject touchObj = Instantiate(_fingerTipPrefab, this.gameObject.transform);
